@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useRef, useEffect } from "react"
 import { Camera, Car, X } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,16 +29,15 @@ export default function CadastrarVeiculo() {
         },
         body: JSON.stringify({ action: "buscar_clientes_e_veiculos" }),
       })
-
       if (!response.ok) {
         throw new Error("Erro ao buscar clientes.")
       }
-
       const data = await response.json()
       const clientesData = data.message || []
       setClientes(clientesData)
     } catch (error) {
-      console.error("Error fetching clients:", error)
+      console.error("Erro ao buscar clientes:", error)
+      setFeedback({ type: "error", message: "Erro ao buscar clientes." })
     }
   }
 
@@ -49,20 +47,32 @@ export default function CadastrarVeiculo() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() })) // Converte para maiúsculas
+  }
+
+  const validatePlaca = (placa: string) => {
+    const regex = /^(?:[A-Z]{3}\d{4}|\d[A-Z]\d{2}[A-Z]\d{1})$/;
+    return regex.test(placa);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setFeedback(null)
+
+    // Validação da placa
+    if (!validatePlaca(formData.placa)) {
+      setFeedback({ type: "error", message: "Formato de placa inválido. A placa deve estar no formato correto." })
+      setIsLoading(false)
+      return
+    }
+
     try {
       const dataToSend = {
         action: "cadastrar_veiculo",
         ...formData,
         fotos: fotos,
       }
-
       const response = await fetch(LAMBDA_URL, {
         method: "POST",
         headers: {
@@ -79,13 +89,10 @@ export default function CadastrarVeiculo() {
       setFormData({ placa: "", cpfCliente: "", fotos: [] })
       setFotos([])
     } catch (error) {
-      console.error("Error details:", error)
+      console.error("Detalhes do erro:", error)
       setFeedback({
         type: "error",
-        message:
-          error instanceof Error
-            ? `Erro ao cadastrar veículo: ${error.message}`
-            : "Erro desconhecido ao cadastrar veículo. Por favor, tente novamente.",
+        message: error instanceof Error ? `Erro ao cadastrar veículo: ${error.message}` : "Erro desconhecido. Tente novamente.",
       })
     } finally {
       setIsLoading(false)
@@ -111,11 +118,10 @@ export default function CadastrarVeiculo() {
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cadastrar Veículo</h1>
-          <p className="mt-2 text-gray-600">Registre um novo veículo no sistema</p>
+          <h1 className="text-2xl font-bold text-gray-900">Registre um Novo Veículo</h1>
+          <p className="mt-2 text-gray-600">Insira os detalhes do veículo para registro</p>
         </div>
       </div>
-
       <Card className="bg-card p-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -133,16 +139,20 @@ export default function CadastrarVeiculo() {
               {feedback.message}
             </div>
           )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-2">
               <div className="grid gap-1">
                 <label htmlFor="placa" className="text-sm font-medium text-gray-700">
                   Placa
                 </label>
-                <Input id="placa" name="placa" value={formData.placa} onChange={handleInputChange} required />
+                <Input 
+                  id="placa" 
+                  name="placa" 
+                  value={formData.placa} 
+                  onChange={handleInputChange} 
+                  required 
+                />
               </div>
-
               <div className="grid gap-1">
                 <label htmlFor="cpfCliente" className="text-sm font-medium text-gray-700">
                   Cliente
@@ -163,7 +173,6 @@ export default function CadastrarVeiculo() {
                   ))}
                 </select>
               </div>
-
               <div className="grid gap-1">
                 <label className="text-sm font-medium text-gray-700">Fotos</label>
                 <div className="flex items-center gap-2">
@@ -185,7 +194,6 @@ export default function CadastrarVeiculo() {
                     className="hidden"
                   />
                 </div>
-
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {fotos.map((foto, index) => (
                     <div key={index} className="relative aspect-square">
@@ -207,14 +215,12 @@ export default function CadastrarVeiculo() {
                 </div>
               </div>
             </div>
-
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Cadastrando..." : "Cadastrar Veículo"}
             </Button>
           </form>
         </CardContent>
       </Card>
-
       {expandedPhoto && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
