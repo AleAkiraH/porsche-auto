@@ -45,7 +45,7 @@ export default function CadastrarVeiculo() {
 
   useEffect(() => {
     fetchClientes()
-  }, []) //Fixed useEffect dependency
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -108,15 +108,15 @@ export default function CadastrarVeiculo() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cadastrar Veículo</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Cadastrar Veículo</h1>
           <p className="mt-2 text-gray-600">Registre um novo veículo no sistema</p>
         </div>
       </div>
 
-      <Card className="bg-card">
+      <Card className="bg-card p-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Car className="h-6 w-6 text-primary" />
@@ -126,7 +126,7 @@ export default function CadastrarVeiculo() {
         <CardContent>
           {feedback && (
             <div
-              className={`mb-6 rounded-lg p-4 ${
+              className={`mb-4 rounded-lg p-2 ${
                 feedback.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
               }`}
             >
@@ -134,23 +134,23 @@ export default function CadastrarVeiculo() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-2">
+              <div className="grid gap-1">
                 <label htmlFor="placa" className="text-sm font-medium text-gray-700">
                   Placa
                 </label>
                 <Input id="placa" name="placa" value={formData.placa} onChange={handleInputChange} required />
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <label htmlFor="cpfCliente" className="text-sm font-medium text-gray-700">
                   Cliente
                 </label>
                 <select
                   id="cpfCliente"
                   name="cpfCliente"
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   value={formData.cpfCliente}
                   onChange={handleInputChange}
                   required
@@ -164,16 +164,16 @@ export default function CadastrarVeiculo() {
                 </select>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <label className="text-sm font-medium text-gray-700">Fotos</label>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <Button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1"
                   >
-                    <Camera className="h-5 w-5" />
+                    <Camera className="h-4 w-4" />
                     Adicionar Foto
                   </Button>
                   <input
@@ -186,7 +186,7 @@ export default function CadastrarVeiculo() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {fotos.map((foto, index) => (
                     <div key={index} className="relative aspect-square">
                       <img
@@ -200,7 +200,7 @@ export default function CadastrarVeiculo() {
                         onClick={() => handleDeleteFoto(index)}
                         className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
@@ -208,7 +208,7 @@ export default function CadastrarVeiculo() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Cadastrando..." : "Cadastrar Veículo"}
             </Button>
           </form>
@@ -232,4 +232,3 @@ export default function CadastrarVeiculo() {
     </div>
   )
 }
-
