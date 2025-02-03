@@ -128,29 +128,38 @@ export default function BuscarCliente() {
                   {clientesFiltradosParaExibir.length > 0 ? (
                     clientesFiltradosParaExibir.map((cliente, index) => {
                       const placas = cliente.placa || [];
-                      return (
-                        <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
-                          <td className="py-3 px-4" rowSpan={placas.length > 0 ? placas.length : 1}>
-                            {cliente.nome}
-                          </td>
-                          <td className="py-3 px-4" rowSpan={placas.length > 0 ? placas.length : 1}>
-                            {cliente.telefone}
-                          </td>
-                          <td className="py-3 px-4" rowSpan={placas.length > 0 ? placas.length : 1}>
-                            {cliente.cpf}
-                          </td>
-                          {placas.length > 0 ? (
+                      return placas.length > 0 ? (
+                        placas.map((placa, placaIndex) => (
+                          <tr key={`${index}-${placaIndex}`} className="border-b last:border-b-0 hover:bg-gray-50">
+                            {placaIndex === 0 && (
+                              <>
+                                <td className="py-3 px-4" rowSpan={placas.length}>
+                                  {cliente.nome}
+                                </td>
+                                <td className="py-3 px-4" rowSpan={placas.length}>
+                                  {cliente.telefone}
+                                </td>
+                                <td className="py-3 px-4" rowSpan={placas.length}>
+                                  {cliente.cpf}
+                                </td>
+                              </>
+                            )}
                             <td className="py-3 px-4">
                               <button
-                                onClick={() => buscarVeiculo(placas[0])}
+                                onClick={() => buscarVeiculo(placa)}
                                 className="text-green-600 hover:text-green-700 hover:underline"
                               >
-                                {placas[0]}
+                                {placa}
                               </button>
                             </td>
-                          ) : (
-                            <td className="py-3 px-4 text-gray-500">Sem placa</td>
-                          )}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
+                          <td className="py-3 px-4">{cliente.nome}</td>
+                          <td className="py-3 px-4">{cliente.telefone}</td>
+                          <td className="py-3 px-4">{cliente.cpf}</td>
+                          <td className="py-3 px-4 text-gray-500">Sem placa</td>
                         </tr>
                       );
                     })
@@ -162,6 +171,7 @@ export default function BuscarCliente() {
                     </tr>
                   )}
                 </tbody>
+
               </table>
             </div>
           </div>
