@@ -12,17 +12,21 @@ const carModels = [
 export default function ModelosPage() {
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-8">Nossos Modelos</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <h1 className="text-2xl md:text-4xl font-bold mb-6 md:mb-8">Nossos Modelos</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {carModels.map((model) => (
-          <Card key={model.name}>
+          <Card key={model.name} className="flex flex-col">
             <CardHeader>
               <CardTitle>{model.name}</CardTitle>
               <CardDescription>{model.description}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <img src={model.image || "/placeholder.svg"} alt={model.name} className="w-full h-48 object-cover mb-4" />
-              <Button className="w-full">Saiba Mais</Button>
+            <CardContent className="flex-1 flex flex-col">
+              <img 
+                src={model.image || "/placeholder.svg"} 
+                alt={model.name} 
+                className="w-full h-48 object-cover mb-4 rounded-md"
+              />
+              <Button className="w-full mt-auto">Saiba Mais</Button>
             </CardContent>
           </Card>
         ))}
@@ -30,4 +34,3 @@ export default function ModelosPage() {
     </div>
   )
 }
-

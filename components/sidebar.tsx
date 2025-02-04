@@ -3,42 +3,53 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
-import { 
-  Home, UserPlus, Search, Car, FileText, MessageCircle, Settings, LogOut, Menu, ChevronDown, ChevronRight 
-} from "lucide-react"
+import { useState, useEffect } from "react"
+import { Home, UserPlus, Search, Car, FileText, MessageCircle, Settings, LogOut, Menu, ChevronDown, ChevronRight } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { ThemeSelector } from "./theme-selector"
 
 export function Sidebar() {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(true) // Estado do menu
+  const [isOpen, setIsOpen] = useState(false)
   const [openSections, setOpenSections] = useState({
     clientes: false,
     veiculos: false,
     orcamentos: false
   }) 
 
-  const toggleMenu = () => setIsOpen(!isOpen) // Alterna entre abrir/fechar o menu
+  const toggleMenu = () => setIsOpen(!isOpen)
 
-  const toggleSection = (section) => {
+  const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }))
   }
+
+  // Função para fechar o menu quando a rota muda
+  useEffect(() => {
+    setIsOpen(false)
+  }, [])
 
   return (
     <>
       {/* Botão para abrir/fechar o menu */}
       <button
         onClick={toggleMenu}
-        className="fixed top-4 left-4 z-50 flex items-center justify-center rounded-full bg-primary p-2 text-white shadow-lg transition-all hover:bg-primary/80"
+        className="fixed top-4 left-4 z-50 flex items-center justify-center rounded-full bg-primary p-2 text-white shadow-lg transition-all hover:bg-primary/80 md:hidden"
       >
         <Menu className="h-6 w-6" />
       </button>
 
+      {/* Overlay para mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-primary text-primary-foreground transition-transform duration-300",
+          "fixed left-0 top-0 z-40 h-screen w-64 overflow-y-auto bg-primary text-primary-foreground transition-transform duration-300 md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -63,12 +74,11 @@ export function Sidebar() {
             </Link>
           </div>
 
-          {/* Itens do Menu */}
+          {/* Menu Items */}
           <nav className="space-y-2">
-            {/* Home */}
             <Link
               href="/"
-              onClick={toggleMenu}
+              onClick={() => setIsOpen(false)}
               className={cn(
                 "flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-white/10",
                 pathname === "/" ? "bg-white/10" : ""
@@ -78,7 +88,7 @@ export function Sidebar() {
               Home
             </Link>
 
-            {/* Clientes */}
+            {/* Clientes Section */}
             <div>
               <button 
                 onClick={() => toggleSection("clientes")} 
@@ -92,8 +102,12 @@ export function Sidebar() {
               </button>
               {openSections.clientes && (
                 <div className="ml-6 space-y-1">
-                  <Link href="/cadastrar-cliente" onClick={toggleMenu} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">Cadastrar Cliente</Link>
-                  <Link href="/buscar-cliente" onClick={toggleMenu} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">Buscar Cliente</Link>
+                  <Link href="/cadastrar-cliente" onClick={() => setIsOpen(false)} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">
+                    Cadastrar Cliente
+                  </Link>
+                  <Link href="/buscar-cliente" onClick={() => setIsOpen(false)} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">
+                    Buscar Cliente
+                  </Link>
                 </div>
               )}
             </div>
@@ -112,7 +126,9 @@ export function Sidebar() {
               </button>
               {openSections.veiculos && (
                 <div className="ml-6 space-y-1">
-                  <Link href="/cadastrar-veiculo" onClick={toggleMenu} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">Cadastrar Veículo</Link>
+                  <Link href="/cadastrar-veiculo" onClick={() => setIsOpen(false)} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">
+                    Cadastrar Veículo
+                  </Link>
                 </div>
               )}
             </div>
@@ -131,21 +147,25 @@ export function Sidebar() {
               </button>
               {openSections.orcamentos && (
                 <div className="ml-6 space-y-1">
-                  <Link href="/cadastrar-orcamento" onClick={toggleMenu} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">Cadastrar Orçamento</Link>
-                  <Link href="/buscar-orcamento" onClick={toggleMenu} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">Buscar Orçamento</Link>
+                  <Link href="/cadastrar-orcamento" onClick={() => setIsOpen(false)} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">
+                    Cadastrar Orçamento
+                  </Link>
+                  <Link href="/buscar-orcamento" onClick={() => setIsOpen(false)} className="block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/10">
+                    Buscar Orçamento
+                  </Link>
                 </div>
               )}
             </div>
           </nav>
 
-          {/* Configurações e Logout */}
+          {/* Settings and Logout */}
           <div className="mt-auto space-y-2">
             <div className="px-3 py-2">
               <ThemeSelector />
             </div>
             <Link
               href="/configuracoes"
-              onClick={toggleMenu}
+              onClick={() => setIsOpen(false)}
               className="flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-white/10"
             >
               <Settings className="mr-3 h-5 w-5" />
@@ -153,7 +173,7 @@ export function Sidebar() {
             </Link>
             <Link
               href="/sair"
-              onClick={toggleMenu}
+              onClick={() => setIsOpen(false)}
               className="flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-white/10"
             >
               <LogOut className="mr-3 h-5 w-5" />

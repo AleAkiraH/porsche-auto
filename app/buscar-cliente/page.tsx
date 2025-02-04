@@ -40,7 +40,7 @@ export default function BuscarCliente() {
 
   useEffect(() => {
     fetchClientes()
-  }, []) //Fixed useEffect dependency
+  }, [])
 
   const handleSearchChange = (e) => {
     const value = e.target.value
@@ -88,11 +88,9 @@ export default function BuscarCliente() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Buscar Cliente</h1>
-          <p className="mt-2 text-gray-600">Pesquise e gerencie os clientes cadastrados</p>
-        </div>
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Buscar Cliente</h1>
+        <p className="text-gray-600">Pesquise e gerencie os clientes cadastrados</p>
       </div>
 
       <Card className="bg-card">
@@ -113,73 +111,74 @@ export default function BuscarCliente() {
             />
           </div>
 
-          <div className="rounded-lg border">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">Nome</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">Telefone</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">CPF</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">Placa</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clientesFiltradosParaExibir.length > 0 ? (
-                    clientesFiltradosParaExibir.map((cliente, index) => {
-                      const placas = cliente.placa || [];
-                      return placas.length > 0 ? (
-                        placas.map((placa, placaIndex) => (
-                          <tr key={`${index}-${placaIndex}`} className="border-b last:border-b-0 hover:bg-gray-50">
-                            {placaIndex === 0 && (
-                              <>
-                                <td className="py-3 px-4" rowSpan={placas.length}>
-                                  {cliente.nome}
-                                </td>
-                                <td className="py-3 px-4" rowSpan={placas.length}>
-                                  {cliente.telefone}
-                                </td>
-                                <td className="py-3 px-4" rowSpan={placas.length}>
-                                  {cliente.cpf}
-                                </td>
-                              </>
-                            )}
-                            <td className="py-3 px-4">
-                              <button
-                                onClick={() => buscarVeiculo(placa)}
-                                className="text-green-600 hover:text-green-700 hover:underline"
-                              >
-                                {placa}
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
-                          <td className="py-3 px-4">{cliente.nome}</td>
-                          <td className="py-3 px-4">{cliente.telefone}</td>
-                          <td className="py-3 px-4">{cliente.cpf}</td>
-                          <td className="py-3 px-4 text-gray-500">Sem placa</td>
-                        </tr>
-                      );
-                    })
-                  ) : (
+          <div className="overflow-x-auto">
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
-                        Nenhum cliente encontrado
-                      </td>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CPF</th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Placa</th>
                     </tr>
-                  )}
-                </tbody>
-
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {clientesFiltradosParaExibir.length > 0 ? (
+                      clientesFiltradosParaExibir.map((cliente, index) => {
+                        const placas = cliente.placa || [];
+                        return placas.length > 0 ? (
+                          placas.map((placa, placaIndex) => (
+                            <tr key={`${index}-${placaIndex}`} className="hover:bg-gray-50">
+                              {placaIndex === 0 && (
+                                <>
+                                  <td className="px-4 py-3 whitespace-nowrap" rowSpan={placas.length}>
+                                    {cliente.nome}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap" rowSpan={placas.length}>
+                                    {cliente.telefone}
+                                  </td>
+                                  <td className="px-4 py-3 whitespace-nowrap" rowSpan={placas.length}>
+                                    {cliente.cpf}
+                                  </td>
+                                </>
+                              )}
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <button
+                                  onClick={() => buscarVeiculo(placa)}
+                                  className="text-green-600 hover:text-green-700 hover:underline"
+                                >
+                                  {placa}
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 whitespace-nowrap">{cliente.nome}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">{cliente.telefone}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">{cliente.cpf}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-gray-500">Sem placa</td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-4 text-center text-gray-500">
+                          Nenhum cliente encontrado
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {veiculo && (
-        <Card className="bg-card">
+        <Card className="bg-card" ref={detalhesVeiculoRef}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Car className="h-6 w-6 text-primary" />
@@ -196,13 +195,13 @@ export default function BuscarCliente() {
               </div>
               <div>
                 <span className="font-medium">Fotos:</span>
-                <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {veiculo.fotos.map((foto, index) => (
                     <img
                       key={index}
                       src={foto || "/placeholder.svg"}
                       alt={`Foto ${index + 1}`}
-                      className="aspect-square rounded-lg object-cover"
+                      className="aspect-square rounded-lg object-cover w-full"
                     />
                   ))}
                 </div>
@@ -214,4 +213,3 @@ export default function BuscarCliente() {
     </div>
   )
 }
-

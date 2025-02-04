@@ -67,14 +67,12 @@ export default function CadastrarCliente() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Cadastrar Cliente</h1>
-          <p className="mt-2 text-gray-600">Adicione um novo cliente ao sistema</p>
-        </div>
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Cadastrar Cliente</h1>
+        <p className="text-gray-600">Adicione um novo cliente ao sistema</p>
       </div>
 
-      <Card className="bg-card">
+      <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-6 w-6 text-primary" />
@@ -84,11 +82,12 @@ export default function CadastrarCliente() {
         <CardContent>
           {feedback && (
             <div
-              className={`mb-6 rounded-lg p-4 ${
+              className={cn(
+                "mb-6 rounded-lg p-4",
                 feedback.type === "success"
                   ? "bg-secondary text-secondary-foreground"
                   : "bg-destructive/10 text-destructive"
-              }`}
+              )}
             >
               {feedback.message}
             </div>
@@ -134,4 +133,3 @@ export default function CadastrarCliente() {
     </div>
   )
 }
-
