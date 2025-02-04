@@ -1,17 +1,17 @@
-"use client";
-import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import jsPDF from "jspdf";
+"use client"
+import { useEffect, useState } from "react"
+import { Search } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { generatePDF } from "@/components/pdfGenerator"
 
-const LAMBDA_URL = "https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/";
+const LAMBDA_URL = "https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/"
 
 export default function BuscarOrcamento() {
-  const [orcamentos, setOrcamentos] = useState([]);
-  const [filteredOrcamentos, setFilteredOrcamentos] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [orcamentos, setOrcamentos] = useState([])
+  const [filteredOrcamentos, setFilteredOrcamentos] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
 
   const fetchOrcamentos = async () => {
     try {
@@ -21,96 +21,40 @@ export default function BuscarOrcamento() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ action: "buscar_orcamentos" }),
-      });
+      })
       if (!response.ok) {
-        throw new Error("Erro ao buscar orçamentos.");
+        throw new Error("Erro ao buscar orçamentos.")
       }
-      const data = await response.json();
-      console.log("Dados recebidos da API:", data);
-      const orcamentosData = data.message || [];
-      setOrcamentos(orcamentosData);
-      setFilteredOrcamentos(orcamentosData);
+      const data = await response.json()
+      console.log("Dados recebidos da API:", data)
+      const orcamentosData = data.message || []
+      setOrcamentos(orcamentosData)
+      setFilteredOrcamentos(orcamentosData)
     } catch (error) {
-      console.error("Error fetching budgets:", error);
-      setOrcamentos([]);
-      setFilteredOrcamentos([]);
+      console.error("Error fetching budgets:", error)
+      setOrcamentos([])
+      setFilteredOrcamentos([])
     }
-  };
+  }
 
   useEffect(() => {
-    fetchOrcamentos();
-  }, []);
+    fetchOrcamentos()
+  }, [fetchOrcamentos]) // Added fetchOrcamentos to the dependency array
 
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
+    const value = e.target.value
+    setSearchTerm(value)
     const orcamentoFiltrado = orcamentos.filter((orcamento) => {
-      const searchValue = value.toLowerCase();
+      const searchValue = value.toLowerCase()
       return (
         orcamento.placaVeiculo.toLowerCase().includes(searchValue) ||
         orcamento.dataEntrega.toLowerCase().includes(searchValue) ||
         (orcamento.nomeCliente && orcamento.nomeCliente.toLowerCase().includes(searchValue)) ||
         (orcamento.telefoneCliente && orcamento.telefoneCliente.includes(searchValue))
-      );
-    });
-    setFilteredOrcamentos(orcamentoFiltrado);
-  };
-
-  const downloadPDF = async (orcamento) => {
-    const doc = new jsPDF();
-    doc.text("Detalhes do Orçamento", 10, 10);
-    doc.text(`Data/Hora: ${orcamento.dataHora}`, 10, 20);
-    doc.text(`Data de Entrega: ${orcamento.dataEntrega}`, 10, 30);
-    doc.text(`Descrição do Serviço: ${orcamento.descricaoServico}`, 10, 40);
-    doc.text(`Valor do Serviço: ${orcamento.valorServico}`, 10, 50);
-    doc.text(`Placa do Veículo: ${orcamento.placaVeiculo}`, 10, 60);
-    doc.text(`Nome do Cliente: ${orcamento.nomeCliente}`, 10, 70);
-    doc.text(`Telefone do Cliente: ${orcamento.telefoneCliente}`, 10, 80);
-    doc.text(`CPF do Cliente: ${orcamento.cpfCliente}`, 10, 90);
-
-    let xOffset = 10; // Posição inicial X para imagens
-    let yOffset = 110; // Posição inicial Y para imagens
-    const imgWidth = 50; // Largura de cada imagem
-    const imgHeight = 50; // Altura de cada imagem
-    const pageWidth = doc.internal.pageSize.width; // Largura total da página
-    const margin = 10; // Margem entre as imagens
-
-    if (orcamento.fotos && orcamento.fotos.length > 0) {
-      try {
-        const imagensCarregadas = await Promise.all(
-          orcamento.fotos.map((foto) => loadImage(foto))
-        );
-        imagensCarregadas.forEach((imgData, index) => {
-          if (xOffset + imgWidth > pageWidth - margin) {
-            xOffset = 10;
-            yOffset += imgHeight + 10;
-          }
-          doc.addImage(imgData, "JPEG", xOffset, yOffset, imgWidth, imgHeight);
-          xOffset += imgWidth + margin; // Move para a direita
-        });
-      } catch (error) {
-        console.error("Erro ao carregar as imagens:", error);
-      }
-    }
-    doc.save("orcamento.pdf");
-  };
-
-  const loadImage = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.src = url;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg"));
-      };
-      img.onerror = (err) => reject(err);
-    });
-  };
+      )
+    })
+    setFilteredOrcamentos(orcamentoFiltrado)
+  }
 
   return (
     <div className="space-y-6">
@@ -164,10 +108,7 @@ export default function BuscarOrcamento() {
                         <td className="py-3 px-4">{orcamento.telefoneCliente}</td>
                         <td className="py-3 px-4">{orcamento.cpfCliente}</td>
                         <td className="py-3 px-4">
-                          <Button 
-                            onClick={() => downloadPDF(orcamento)} 
-                            className="w-full"
-                          >
+                          <Button onClick={() => generatePDF(orcamento)} className="w-full">
                             Imprimir
                           </Button>
                         </td>
@@ -187,5 +128,6 @@ export default function BuscarOrcamento() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
+

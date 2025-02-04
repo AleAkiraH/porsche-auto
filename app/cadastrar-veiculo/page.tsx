@@ -1,24 +1,24 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
-import { Camera, Car, X } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+"use client";
+import { useState, useRef, useEffect } from "react";
+import { Camera, Car, X } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-const LAMBDA_URL = "https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/"
+const LAMBDA_URL = "https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/";
 
 export default function CadastrarVeiculo() {
   const [formData, setFormData] = useState({
     placa: "",
     cpfCliente: "",
     fotos: [] as string[],
-  })
-  const [fotos, setFotos] = useState<string[]>([])
-  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [clientes, setClientes] = useState<{ nome: string; cpf: string }[]>([])
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [fotos, setFotos] = useState<string[]>([]);
+  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [clientes, setClientes] = useState<{ nome: string; cpf: string }[]>([]);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchClientes = async () => {
     try {
@@ -28,43 +28,44 @@ export default function CadastrarVeiculo() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ action: "buscar_clientes_e_veiculos" }),
-      })
+      });
       if (!response.ok) {
-        throw new Error("Erro ao buscar clientes.")
+        throw new Error("Erro ao buscar clientes.");
       }
-      const data = await response.json()
-      const clientesData = data.message || []
-      setClientes(clientesData)
+      const data = await response.json();
+      const clientesData = data.message || [];
+      setClientes(clientesData);
     } catch (error) {
-      console.error("Erro ao buscar clientes:", error)
-      setFeedback({ type: "error", message: "Erro ao buscar clientes." })
+      console.error("Erro ao buscar clientes:", error);
+      setFeedback({ type: "error", message: "Erro ao buscar clientes." });
     }
-  }
+  };
 
   useEffect(() => {
-    fetchClientes()
-  }, [])
+    fetchClientes();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() })) // Converte para maiúsculas
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() })); // Converte para maiúsculas
+  };
 
   const validatePlaca = (placa: string) => {
-    const regex = /^(?:[A-Z]{3}\d{4}|\d[A-Z]\d{2}[A-Z]\d{1})$/;
+    // Validação da placa
+    const regex = /^(?:[A-Z]{3}\d{4}|[A-Z]{3}\d[A-Z]\d{2}|[A-Z]{2}\d[A-Z]\d{2})$/;
     return regex.test(placa);
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setFeedback(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setFeedback(null);
 
     // Validação da placa
     if (!validatePlaca(formData.placa)) {
-      setFeedback({ type: "error", message: "Formato de placa inválido. A placa deve estar no formato correto." })
-      setIsLoading(false)
-      return
+      setFeedback({ type: "error", message: "Formato de placa inválido. A placa deve estar no formato correto." });
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -72,47 +73,47 @@ export default function CadastrarVeiculo() {
         action: "cadastrar_veiculo",
         ...formData,
         fotos: fotos,
-      }
+      };
       const response = await fetch(LAMBDA_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(dataToSend),
-      })
+      });
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Erro desconhecido ao cadastrar veículo.")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro desconhecido ao cadastrar veículo.");
       }
-      const responseData = await response.json()
-      setFeedback({ type: "success", message: responseData.message })
-      setFormData({ placa: "", cpfCliente: "", fotos: [] })
-      setFotos([])
+      const responseData = await response.json();
+      setFeedback({ type: "success", message: responseData.message });
+      setFormData({ placa: "", cpfCliente: "", fotos: [] });
+      setFotos([]);
     } catch (error) {
-      console.error("Detalhes do erro:", error)
+      console.error("Detalhes do erro:", error);
       setFeedback({
         type: "error",
         message: error instanceof Error ? `Erro ao cadastrar veículo: ${error.message}` : "Erro desconhecido. Tente novamente.",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleFotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setFotos((prev) => [...prev, reader.result as string])
-      }
-      reader.readAsDataURL(file)
+        setFotos((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleDeleteFoto = (index: number) => {
-    setFotos((prev) => prev.filter((_, i) => i !== index))
-  }
+    setFotos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="space-y-4 p-4">
@@ -236,5 +237,5 @@ export default function CadastrarVeiculo() {
         </div>
       )}
     </div>
-  )
+  );
 }
