@@ -11,7 +11,7 @@ export default function HomePage() {
     { 
       href: '/buscar-cliente', 
       label: 'Clientes', 
-      icon: <Users className="h-8 w-8" />,
+      icon: <Users className="h-6 w-6" />,
       color: 'from-sky-400 to-blue-500',
       glowColor: 'blue',
       delay: 0.2
@@ -35,56 +35,46 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 relative overflow-hidden">
-      {/* Efeitos de fundo mais sutis */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-blue-100/50 to-transparent blur-3xl" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-red-100/50 to-transparent blur-3xl" />
-      </div>
-      
-      <main className="container relative mx-auto px-4 py-8">
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
+      <main className="container mx-auto px-4 py-4">
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-2rem)]">
           <motion.div 
-            initial={{ y: -50, opacity: 0 }}
+            initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-12"
+            className="mb-8"
           >
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/10">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/porsche-logo.png-h6369Ri6OvhlOwwMFrhB50VPBSmcUM.jpeg"
-                alt="Porsche Logo"
-                width={240}
-                height={120}
-                className="rounded-lg"
-                priority
-              />
-            </div>
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/porsche-logo.png-h6369Ri6OvhlOwwMFrhB50VPBSmcUM.jpeg"
+              alt="Porsche Logo"
+              width={160}
+              height={80}
+              className="rounded-lg"
+              priority
+            />
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full">
+          <div className="grid grid-cols-3 gap-2 w-full max-w-xl">
             {menuItems.map((item) => (
               <motion.div
                 key={item.href}
-                initial={{ y: 50, opacity: 0 }}
+                initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: item.delay, duration: 0.5 }}
               >
                 <Link href={item.href} className="group block">
                   <Card className={`
-                    p-8 h-full bg-gradient-to-br ${item.color}
-                    hover:shadow-2xl hover:shadow-${item.glowColor}-500/50
-                    transition-all duration-500 ease-out
-                    transform hover:-translate-y-2 group-hover:scale-[1.02]
-                    border border-white/10 text-white relative overflow-hidden
-                    backdrop-blur-sm bg-opacity-90
+                    p-4 h-full bg-gradient-to-br ${item.color}
+                    hover:shadow-lg hover:shadow-${item.glowColor}-500/30
+                    transition-all duration-300
+                    transform hover:-translate-y-1
+                    border-none text-white relative
                   `}>
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative flex flex-col items-center text-center space-y-4">
-                      <div className="p-4 bg-white/20 rounded-full transform group-hover:scale-110 transition-transform duration-500">
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <div className="p-2 bg-white/20 rounded-full">
                         {item.icon}
                       </div>
-                      <span className="text-xl font-medium tracking-wide">
+                      <span className="text-sm font-medium">
                         {item.label}
                       </span>
                     </div>
