@@ -569,30 +569,21 @@ def atualizar_orcamento(payload):
         id_orcamento = body.get('id')
         
         if not id_orcamento:
-            logger.error("❌ ID do orçamento não fornecido")
             return padronizar_resposta(400, 'ID do orçamento é obrigatório')
+            
+        # Criar objeto de atualização apenas com campos fornecidos
+        update_fields = {}
         
-        campos_obrigatorios = {
-            'placa': body.get('placa'),
-            'descricao': body.get('descricao'),
-            'previsaoEntrega': body.get('previsaoEntrega'),
-            'valor': body.get('valor')
-        }
+        # Mapear campos que podem ser atualizados
+        if 'placa' in body: update_fields['placa'] = body['placa']
+        if 'descricao' in body: update_fields['descricao'] = body['descricao']
+        if 'previsaoEntrega' in body: update_fields['previsaoEntrega'] = body['previsaoEntrega']
+        if 'valor' in body: update_fields['valor'] = body['valor']
+        if 'status' in body: update_fields['status'] = body['status']
+        if 'fotos' in body: update_fields['fotos'] = body['fotos']
         
-        for campo, valor in campos_obrigatorios.items():
-            if valor is None:
-                logger.error(f"❌ Campo {campo} é obrigatório")
-                return padronizar_resposta(400, f'Campo {campo} é obrigatório')
-        
-        update_fields = {
-            'placa': body['placa'],
-            'descricao': body['descricao'],
-            'previsaoEntrega': body['previsaoEntrega'],
-            'valor': body['valor'],
-            'status': body.get('status', 'pendente'),
-            'fotos': body.get('fotos', []),
-            'dataAtualizacao': datetime.now().isoformat()
-        }
+        # Adicionar data de atualização
+        update_fields['dataAtualizacao'] = datetime.now().isoformat()
         
         try:
             object_id = ObjectId(id_orcamento)
@@ -602,9 +593,8 @@ def atualizar_orcamento(payload):
             )
             
             if result.modified_count > 0:
-                return padronizar_resposta(200, '')  # Retorna string vazia ao invés de mensagem
+                return padronizar_resposta(200, 'Orçamento atualizado com sucesso')
             else:
-                logger.warning("❌ Orçamento não encontrado")
                 return padronizar_resposta(404, 'Orçamento não encontrado')
                 
         except Exception as e:

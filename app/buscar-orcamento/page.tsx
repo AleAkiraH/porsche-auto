@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Label } from "@/components/ui/label" // Adicionando import do Label
 import { Search, PlusCircle, ChevronDown, ChevronUp, RefreshCcw, Trash2, Pencil, FileText, Car, User, Calendar, Camera, Printer } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -14,6 +15,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { formatarMoeda, logAPI } from "@/lib/utils"
 import { generatePDF } from '@/components/pdf/orcamento-pdf';
 import { toast } from 'sonner';
+import { Footer } from "@/components/ui/footer"
 
 interface Orcamento {
   _id: string;
@@ -35,6 +37,7 @@ export default function BuscarOrcamentoPage() {
   const [orcamentoParaExcluir, setOrcamentoParaExcluir] = useState<string | null>(null)
   const [loadingFotos, setLoadingFotos] = useState<Record<string, boolean>>({})
   const [showThumbnails, setShowThumbnails] = useState<Record<string, boolean>>({})
+  const [statusFiltro, setStatusFiltro] = useState<string>('todos');
 
   const fetchOrcamentos = async () => {
     try {
@@ -150,13 +153,45 @@ export default function BuscarOrcamentoPage() {
     }
   };
 
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    try {
+      const response = await fetch('https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'atualizar_orcamento',
+          body: {
+            id: id,
+            status: newStatus
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar status');
+      }
+
+      // Atualizar a lista de orçamentos
+      fetchOrcamentos();
+
+    } catch (error) {
+      toast.error('Erro ao atualizar status');
+    }
+  };
+
   const filteredOrcamentos = Array.isArray(orcamentos) ? orcamentos.filter(orcamento => {
     const termoBusca = busca.toLowerCase();
-    return (
-      orcamento.placa.toLowerCase().includes(termoBusca) ||
-      orcamento.descricao.toLowerCase().includes(termoBusca)
-    );
-  }) : [];
+    const matchBusca = orcamento.placa.toLowerCase().includes(termoBusca) ||
+                     orcamento.descricao.toLowerCase().includes(termoBusca);
+  
+    // Adiciona filtro por status
+    const matchStatus = statusFiltro === 'todos' || orcamento.status === statusFiltro;
+  
+    return matchBusca && matchStatus;
+  }).sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime()) : [];
 
   useEffect(() => {
     fetchOrcamentos()
@@ -168,6 +203,25 @@ export default function BuscarOrcamentoPage() {
     aprovado: "bg-green-100 text-green-800",
     reprovado: "bg-red-100 text-red-800"
   }
+
+  // Atualizar a ordem e estilização dos statusOptions
+  const statusOptions = [
+    { 
+      value: 'pendente', 
+      label: 'Pendente',
+      className: 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+    },
+    { 
+      value: 'aprovado', 
+      label: 'Aprovado',
+      className: 'bg-green-500 hover:bg-green-600 text-white'
+    },
+    { 
+      value: 'reprovado', 
+      label: 'Reprovado',
+      className: 'bg-red-500 hover:bg-red-600 text-white'
+    }
+  ];
 
   // Função auxiliar para formatar data (ajustada para considerar fuso horário)
   const formatarData = (data: string) => {
@@ -227,6 +281,32 @@ export default function BuscarOrcamentoPage() {
           </div>
         </motion.div>
 
+        {/* Botões de filtro com tamanho ainda mais reduzido */}
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex gap-2 mb-6 overflow-x-auto pb-2"
+        >
+          <Button
+            variant="default"
+            onClick={() => setStatusFiltro('todos')}
+            className="h-7 px-2.5 text-xs rounded-xl bg-gray-900 text-white hover:bg-gray-800"
+          >
+            Todos
+          </Button>
+          {statusOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant="default"
+              onClick={() => setStatusFiltro(option.value)}
+              className={`${option.className} h-7 px-2.5 text-xs rounded-xl`}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </motion.div>
+
         {/* Lista de Orçamentos */}
         <div className="space-y-4 pb-20">
           {filteredOrcamentos.map((orcamento, index) => (
@@ -262,7 +342,6 @@ export default function BuscarOrcamentoPage() {
                         </div>
                       </div>
                     </div>
-                    
                     <Button
                       variant="ghost"
                       size="icon"
@@ -368,6 +447,25 @@ export default function BuscarOrcamentoPage() {
                         </div>
                       )}
 
+                      <div className="grid gap-2 mt-4">
+                        <Label>Status do Orçamento</Label>
+                        <div className="flex gap-2">
+                          {statusOptions.map((option) => (
+                            <Button
+                              key={option.value}
+                              variant="default"
+                              className={option.className}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await handleUpdateStatus(orcamento._id, option.value);
+                              }}
+                            >
+                              {option.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
                       {/* Botões de ação */}
                       <div className="flex justify-end gap-2 mt-4">
                         <Button
@@ -445,6 +543,7 @@ export default function BuscarOrcamentoPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      <Footer />
     </div>
   )
 }

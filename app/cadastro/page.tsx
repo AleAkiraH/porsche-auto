@@ -413,9 +413,9 @@ export default function CadastroPage() {
                 <dt className="text-sm text-muted-foreground">Telefone</dt>
                 <dd>{formData.telefone}</dd>
               </div>
-              <div>
-                <dt className="text-sm text-muted-foreground">Email</dt>
-                <dd>{formData.email || '-'}</dd>
+              <div className="col-span-2">
+              <dt className="text-sm text-muted-foreground">Email</dt>
+              <dd>{formData.email || '-'}</dd>
               </div>
               <div className="col-span-2">
                 <dt className="text-sm text-muted-foreground">Endereço</dt>
@@ -483,8 +483,8 @@ export default function CadastroPage() {
             </Button>
           </Link>
           <PageHeader 
-            title="Novo Cadastro"
-            description="Cadastro de cliente e veículo"
+            title="Novo Cliente" // Alterado de "Novo Cadastro" para "Cadastro de Cliente"
+            description="Preencha os dados do cliente"
           />
         </div>
 
