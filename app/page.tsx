@@ -52,19 +52,19 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {/* Logo */}
+          {/* Logo ajustado - maior e mais alto */}
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-12"
+            className="mb-16 mt-[-64px]" // Aumentado mb-12 para mb-16 e adicionado margem negativa no topo
           >
-            <div className="rounded-full overflow-hidden w-32 h-32 bg-black shadow-xl">
+            <div className="rounded-full overflow-hidden w-40 h-40 bg-black shadow-xl"> {/* Aumentado de w-32/h-32 para w-40/h-40 */}
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/porsche-logo.png-h6369Ri6OvhlOwwMFrhB50VPBSmcUM.jpeg"
                 alt="Porsche Logo"
-                width={128}
-                height={128}
+                width={160} // Aumentado de 128 para 160
+                height={160} // Aumentado de 128 para 160
                 className="object-contain p-4"
                 priority
               />

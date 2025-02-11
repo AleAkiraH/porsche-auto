@@ -208,7 +208,7 @@ export default function BuscarClientePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
       <div className="container mx-auto p-4">
-        {/* Header com stats */}
+        {/* Header simplificado - removido os cards de estatísticas */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -218,26 +218,6 @@ export default function BuscarClientePage() {
             title="Gerenciamento de Clientes"
             description="Sistema integrado de gestão de clientes Porsche"
           />
-          
-          {/* Cards de estatísticas - Ajustado para melhor visualização em mobile */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-            <Card className="p-6 bg-gradient-to-br from-sky-400 to-blue-500 text-white">
-              <h3 className="text-sm font-semibold mb-1">Total Clientes</h3>
-              <p className="text-3xl font-bold">{clientes.length}</p>
-            </Card>
-            <Card className="p-6 bg-gradient-to-br from-emerald-400 to-green-500 text-white">
-              <h3 className="text-sm font-semibold mb-1">Clientes Ativos</h3>
-              <p className="text-3xl font-bold">
-                {clientes.filter(c => c.placa.length > 0).length}
-              </p>
-            </Card>
-            <Card className="p-6 bg-gradient-to-br from-rose-400 to-red-500 text-white">
-              <h3 className="text-sm font-semibold mb-1">Total Veículos</h3>
-              <p className="text-3xl font-bold">
-                {clientes.reduce((acc, curr) => acc + curr.placa.length, 0)}
-              </p>
-            </Card>
-          </div>
         </motion.div>
 
         {/* Barra de pesquisa e botões */}
@@ -460,14 +440,14 @@ export default function BuscarClientePage() {
                 Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogFooter className="flex justify-center gap-4">
               <AlertDialogAction
                 className="bg-red-600 hover:bg-red-700"
                 onClick={() => clienteParaExcluir && handleExcluir(clienteParaExcluir)}
               >
                 Excluir
               </AlertDialogAction>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -480,14 +460,14 @@ export default function BuscarClientePage() {
                 Tem certeza que deseja excluir o veículo com placa {veiculoParaExcluir}? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogFooter className="flex justify-center gap-4">
               <AlertDialogAction
                 className="bg-red-600 hover:bg-red-700"
                 onClick={() => veiculoParaExcluir && handleExcluirVeiculo(veiculoParaExcluir)}
               >
                 Excluir
               </AlertDialogAction>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
