@@ -57,14 +57,14 @@ export default function HomePage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-16 mt-[-64px]" // Aumentado mb-12 para mb-16 e adicionado margem negativa no topo
+            className="mb-16 mt-[-100px]" // Aumentado margem negativa no topo e aumentado margin-bottom
           >
-            <div className="rounded-full overflow-hidden w-40 h-40 bg-black shadow-xl"> {/* Aumentado de w-32/h-32 para w-40/h-40 */}
+            <div className="rounded-full overflow-hidden w-48 h-48 bg-black shadow-xl"> {/* Aumentado de w-40/h-40 para w-48/h-48 */}
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/porsche-logo.png-h6369Ri6OvhlOwwMFrhB50VPBSmcUM.jpeg"
                 alt="Porsche Logo"
-                width={160} // Aumentado de 128 para 160
-                height={160} // Aumentado de 128 para 160
+                width={192} // Aumentado de 160 para 192
+                height={192} // Aumentado de 160 para 192
                 className="object-contain p-4"
                 priority
               />
