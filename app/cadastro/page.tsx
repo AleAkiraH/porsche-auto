@@ -106,7 +106,6 @@ export default function CadastroPage() {
     const { id, value } = e.target
     let formattedValue = value
 
-    // Apply masks based on field
     switch (id) {
       case 'cpf':
         formattedValue = maskCPF(value)
@@ -117,6 +116,8 @@ export default function CadastroPage() {
       case 'placa':
         formattedValue = maskPlaca(value)
         break
+      default:
+        formattedValue = value
     }
 
     setFormData(prev => ({ ...prev, [id]: formattedValue }))

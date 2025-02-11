@@ -1,4 +1,12 @@
-export const useMask = () => {
+export function useMask() {
+  const maskPlaca = (value: string) => {
+    return value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .replace(/(\w{3})(\w)/, '$1-$2')
+      .substring(0, 8)
+  }
+
   const maskCPF = (value: string) => {
     return value
       .replace(/\D/g, '')
@@ -9,31 +17,16 @@ export const useMask = () => {
   }
 
   const maskPhone = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
-    if (cleaned.length <= 10) {
-      return cleaned
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{4})(\d)/, '$1-$2')
-        .replace(/(-\d{4})\d+?$/, '$1')
-    }
-    return cleaned
+    return value
+      .replace(/\D/g, '')
       .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2')
+      .replace(/(\d{4,5})(\d{4})/, '$1-$2')
       .replace(/(-\d{4})\d+?$/, '$1')
   }
 
-  const maskPlaca = (value: string) => {
-    const cleaned = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
-    if (cleaned.length === 7) {
-      // Formato antigo: AAA-9999
-      if (/^[A-Z]{3}\d{4}$/.test(cleaned)) {
-        return cleaned.replace(/(\w{3})(\w{4})/, '$1-$2')
-      }
-      // Formato Mercosul: AAA0A00
-      return cleaned.replace(/(\w{3})(\d)(\w)(\d{2})/, '$1$2$3$4')
-    }
-    return cleaned
+  return { 
+    maskPlaca,
+    maskCPF,
+    maskPhone // Alterado de maskTelefone para maskPhone
   }
-
-  return { maskCPF, maskPhone, maskPlaca }
 }

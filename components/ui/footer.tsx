@@ -4,19 +4,15 @@ import { Button } from "./button"
 
 export function Footer() {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t">
-      <div className="container flex justify-center">
-        <Link href="/">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="rounded-full shadow-lg hover:shadow-xl transition-all"
-          >
-            <Home className="h-5 w-5 mr-2" />
-            Início
-          </Button>
-        </Link>
-      </div>
-    </footer>
+    <div className="fixed bottom-4 left-4 z-50">
+      <Link href="/">
+        <Button 
+          size="icon"
+          className="h-10 w-10 rounded-full bg-black/80 hover:bg-black text-white shadow-lg hover:shadow-xl transition-all"
+        >
+          <Home className="h-4 w-4" />
+        </Button>
+      </Link>
+    </div>
   )
 }

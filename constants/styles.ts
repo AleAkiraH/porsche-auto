@@ -1,4 +1,3 @@
-
 export const themeColors = {
   gradients: {
     background: "from-white via-gray-50 to-gray-100",
@@ -18,7 +17,7 @@ export const themeColors = {
     }
   },
   buttons: {
-    primary: "bg-gradient-to-r from-sky-400 to-blue-500 text-white hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200",
+    primary: "bg-red-500 hover:bg-red-600 text-white",
     secondary: "bg-gradient-to-r from-rose-400 to-red-500 text-white hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200"
   },
   cards: {
@@ -28,12 +27,6 @@ export const themeColors = {
 
 export const layoutClasses = {
   pageWrapper: "min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 relative overflow-hidden",
-  backgroundEffects: `
-    absolute inset-0 overflow-hidden
-    before:absolute before:-top-1/2 before:-right-1/2 before:w-[800px] before:h-[800px] 
-    before:rounded-full before:bg-gradient-to-br before:from-blue-100/50 before:to-transparent before:blur-3xl
-    after:absolute after:-bottom-1/2 after:-left-1/2 after:w-[800px] after:h-[800px] 
-    after:rounded-full after:bg-gradient-to-tr after:from-red-100/50 after:to-transparent after:blur-3xl
-  `,
-  container: "container relative mx-auto p-4 sm:p-6"
+  backgroundEffects: "absolute inset-0 overflow-hidden pointer-events-none",
+  container: "container mx-auto p-4 relative"
 }

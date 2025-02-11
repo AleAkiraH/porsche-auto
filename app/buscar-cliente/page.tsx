@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Search, UserPlus, Car, Phone, ChevronDown, ChevronUp, RefreshCcw, Trash2, Mail, MapPin, Pencil } from "lucide-react"
+import { Search, UserPlus, Car, Phone, ChevronDown, ChevronUp, RefreshCcw, Trash2, Mail, MapPin, Pencil, User } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import Image from "next/image"
@@ -206,51 +206,41 @@ export default function BuscarClientePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 relative overflow-hidden">
-      {/* Efeitos de fundo mais sutis */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-blue-100/50 to-transparent blur-3xl" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-red-100/50 to-transparent blur-3xl" />
-      </div>
-
-      <div className="container relative mx-auto p-4 sm:p-6">
-        {/* Header Section */}
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
+      <div className="container mx-auto p-4">
+        {/* Header com stats */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="mb-6"
         >
           <PageHeader 
-            title={
-              <span className="text-gradient">
-                Gerenciamento de Clientes
-              </span>
-            }
+            title="Gerenciamento de Clientes"
             description="Sistema integrado de gestão de clientes Porsche"
           />
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-            <Card className="p-3 sm:p-4 bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-lg hover:shadow-xl transition-shadow">
-              <h3 className="text-sm sm:text-lg font-semibold">Total Clientes</h3>
-              <p className="text-xl sm:text-3xl font-bold">{clientes.length}</p>
+          {/* Cards de estatísticas - Ajustado para melhor visualização em mobile */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+            <Card className="p-6 bg-gradient-to-br from-sky-400 to-blue-500 text-white">
+              <h3 className="text-sm font-semibold mb-1">Total Clientes</h3>
+              <p className="text-3xl font-bold">{clientes.length}</p>
             </Card>
-            <Card className="p-3 sm:p-4 bg-gradient-to-br from-emerald-400 to-green-500 text-white shadow-lg hover:shadow-xl transition-shadow">
-              <h3 className="text-sm sm:text-lg font-semibold">Clientes Ativos</h3>
-              <p className="text-xl sm:text-3xl font-bold">
+            <Card className="p-6 bg-gradient-to-br from-emerald-400 to-green-500 text-white">
+              <h3 className="text-sm font-semibold mb-1">Clientes Ativos</h3>
+              <p className="text-3xl font-bold">
                 {clientes.filter(c => c.placa.length > 0).length}
               </p>
             </Card>
-            <Card className="col-span-2 sm:col-span-1 p-3 sm:p-4 bg-gradient-to-br from-rose-400 to-red-500 text-white shadow-lg hover:shadow-xl transition-shadow">
-              <h3 className="text-sm sm:text-lg font-semibold">Total Veículos</h3>
-              <p className="text-xl sm:text-3xl font-bold">
+            <Card className="p-6 bg-gradient-to-br from-rose-400 to-red-500 text-white">
+              <h3 className="text-sm font-semibold mb-1">Total Veículos</h3>
+              <p className="text-3xl font-bold">
                 {clientes.reduce((acc, curr) => acc + curr.placa.length, 0)}
               </p>
             </Card>
           </div>
         </motion.div>
 
-        {/* Search Bar */}
+        {/* Barra de pesquisa e botões */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -263,108 +253,64 @@ export default function BuscarClientePage() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome, CPF, telefone ou placa..."
-              className="pl-12 h-12 text-lg bg-white border-gray-200 focus:ring-2 focus:ring-blue-500/50 shadow-sm"
+              className="pl-10 h-12 rounded-xl"
             />
           </div>
           
-          <div className="flex gap-2 sm:gap-4">
+          <div className="flex gap-2">
             <Button 
               onClick={() => fetchClientes()}
-              className="h-12 px-6 bg-gradient-to-r from-sky-400 to-blue-500 text-white hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200"
+              size="icon"
+              className="h-12 w-12 bg-blue-500 hover:bg-blue-600 rounded-xl"
             >
-              <RefreshCcw className="h-5 w-5 sm:mr-2" />
-              <span className="hidden sm:inline">Atualizar</span>
+              <RefreshCcw className="h-5 w-5" />
             </Button>
-            <Link href="/cadastro" className="flex-shrink-0">
-              <Button className="h-12 px-6 bg-gradient-to-r from-rose-400 to-red-500 text-white hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200">
-                <UserPlus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Novo Cliente</span>
+            <Link href="/cadastro">
+              <Button 
+                size="icon"
+                className="h-12 w-12 bg-red-500 hover:bg-red-600 rounded-xl"
+              >
+                <UserPlus className="h-5 w-5" />
               </Button>
             </Link>
           </div>
         </motion.div>
 
-        {/* Client Cards */}
-        <div className="grid gap-4 pb-20">
+        {/* Lista de Clientes */}
+        <div className="space-y-4 pb-20">
           {filteredClientes.map((cliente, index) => (
             <motion.div
               key={cliente.cpf}
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.1 }}
               onClick={() => toggleExpand(cliente.cpf)}
               className="cursor-pointer"
             >
-              <Card className="bg-white hover:shadow-lg transition-shadow duration-200 mb-4">
-                <div className="p-4 sm:p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-4 flex-1">
-                      {/* Cabeçalho com Nome e CPF */}
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
-                          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-base sm:text-xl font-semibold truncate">{cliente.nome}</h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground">CPF: {cliente.cpf}</p>
-                        </div>
+              <Card className="bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all duration-200">
+                <div className="p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    {/* Avatar e Info Principal */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0"> {/* Adicionado min-w-0 */}
+                      <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <User className="h-5 w-5 text-red-600" />
                       </div>
-                      
-                      {/* Grid com informações do cliente */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm">{cliente.telefone}</span>
-                        </div>
-                        
-                        {cliente.email && (
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm truncate">{cliente.email}</span>
-                          </div>
-                        )}
-                        
-                        {cliente.endereco && (
-                          <div className="flex items-center gap-2 col-span-full">
-                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm truncate">{cliente.endereco}</span>
-                          </div>
-                        )}
-                        
-                        {cliente.placa.length > 0 && (
-                          <div className="flex items-center gap-2 col-span-full">
-                            <Car className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm">
-                              Veículos: {cliente.placa.join(', ')}
-                            </span>
-                          </div>
-                        )}
+                      <div className="min-w-0 flex-1"> {/* Garante que o texto quebre */}
+                        <h3 className="text-base font-semibold truncate">{cliente.nome}</h3>
+                        <p className="text-sm text-gray-500 truncate">CPF: {cliente.cpf}</p>
                       </div>
                     </div>
 
-                    {/* Botões de ação */}
-                    <div className="flex gap-2">
-                      <Link href={`/editar-cliente/${cliente.cpf}`}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                    {/* Botões de Ação */}
+                    <div className="flex items-center gap-2 flex-shrink-0"> {/* Adicionado flex-shrink-0 */}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-100"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          setClienteParaExcluir(cliente.cpf)
+                          e.stopPropagation();
+                          toggleExpand(cliente.cpf);
                         }}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
                         {expandedClient === cliente.cpf ? (
                           <ChevronUp className="h-4 w-4" />
                         ) : (
@@ -374,95 +320,119 @@ export default function BuscarClientePage() {
                     </div>
                   </div>
 
-                  {/* Conteúdo expandido (fotos dos veículos) */}
+                  {/* Informações Básicas e Botões de Ação */}
+                  <div className="flex justify-between items-center mt-3">
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm truncate">{cliente.telefone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm">{cliente.placa.length} veículo(s)</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Link href={`/editar-cliente/${cliente.cpf}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClienteParaExcluir(cliente.cpf);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Conteúdo Expandido */}
                   {expandedClient === cliente.cpf && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-4 border-t pt-4"
+                      className="mt-4 pt-4 border-t"
                     >
-                      <div className="grid gap-4">
+                      {/* Lista de Veículos */}
+                      <div className="space-y-3">
                         {cliente.placa.map((placa) => (
-                          <div key={placa} className="space-y-2">
-                            <div className="flex items-center justify-between p-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                          <div key={placa} className="rounded-lg border bg-card">
+                            <div className="flex items-center justify-between p-3">
                               <Button
                                 variant="ghost"
-                                className="flex-1 flex items-center justify-between"
+                                className="flex-1 h-auto p-2 justify-start overflow-hidden"
                                 onClick={(e) => handleVeiculoClick(e, placa)}
                               >
-                                <div className="flex items-center gap-2">
-                                  <Car className="h-4 w-4" />
-                                  <span>Placa: {placa}</span>
+                                <div className="flex items-center gap-2 min-w-0 w-full"> {/* Ajustado para quebrar texto */}
+                                  <Car className="h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate flex-1">{placa}</span>
+                                  <span className="text-sm text-muted-foreground flex-shrink-0">
+                                    {loadingFotos[placa] ? 'Carregando...' : 'Ver fotos'}
+                                  </span>
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                  {loadingFotos[placa] ? 'Carregando...' : 'Clique para ver fotos'}
-                                </span>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-100 ml-2"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-100 ml-2 flex-shrink-0"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  setVeiculoParaExcluir(placa)
+                                  e.stopPropagation();
+                                  setVeiculoParaExcluir(placa);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
 
-                            {loadingFotos[placa] ? (
-                              <div className="flex justify-center p-4">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                              </div>
-                            ) : veiculoDetalhes[placa]?.fotos?.length > 0 ? (
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                {veiculoDetalhes[placa].fotos.map((foto, idx) => (
-                                  <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: idx * 0.1 }}
-                                    className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
-                                    onClick={() => setSelectedImage(foto)}
-                                  >
-                                    <div className="absolute inset-0 bg-gray-200 animate-pulse" /> {/* Loading placeholder */}
-                                    <Image
-                                      src={foto}
-                                      alt={`Foto ${idx + 1} do veículo ${placa}`}
-                                      fill
-                                      className="object-cover transition-transform group-hover:scale-110 z-10"
-                                      onError={(e) => {
-                                        console.error(`Erro ao carregar imagem ${idx + 1}:`, foto)
-                                        e.currentTarget.src = '/placeholder-car.jpg' // Adicione uma imagem de placeholder
+                            {/* Grid de Fotos */}
+                            {veiculoDetalhes[placa]?.fotos?.length > 0 && (
+                              <div className="p-3 border-t">
+                                <div className="grid grid-cols-3 gap-2">
+                                  {veiculoDetalhes[placa].fotos.map((foto, idx) => (
+                                    <motion.div
+                                      key={idx}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: idx * 0.1 }}
+                                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedImage(foto);
                                       }}
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors z-20" />
-                                  </motion.div>
-                                ))}
+                                    >
+                                      <Image
+                                        src={foto}
+                                        alt={`Foto ${idx + 1}`}
+                                        fill
+                                        className="object-cover transition-transform hover:scale-110"
+                                      />
+                                    </motion.div>
+                                  ))}
+                                </div>
                               </div>
-                            ) : (
-                              <p className="text-sm text-muted-foreground text-center py-4">
-                                Nenhuma foto disponível para este veículo
-                              </p>
                             )}
                           </div>
                         ))}
                       </div>
 
-                      <div className="flex justify-end mt-4 gap-2">
+                      {/* Botões de Ação */}
+                      <div className="flex justify-end gap-2 mt-4">
                         <Link href={`/cadastrar-veiculo?cpf=${cliente.cpf}`}>
-                          <Button variant="outline" size="sm" className="h-9 w-9 sm:h-10 sm:w-auto">
-                            <Car className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Adicionar Veículo</span>
-                          </Button>
-                        </Link>
-                        <Link href={`/editar-cliente/${cliente.cpf}`}>
-                          <Button variant="outline" size="sm" className="h-9 w-9 sm:h-10 sm:w-auto">
-                            <UserPlus className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Editar</span>
+                          <Button variant="outline" size="sm">
+                            <Car className="h-4 w-4 mr-2" />
+                            Adicionar Veículo
                           </Button>
                         </Link>
                       </div>
@@ -474,60 +444,54 @@ export default function BuscarClientePage() {
           ))}
         </div>
 
-        {/* ...rest of your component (modals, etc)... */}
+        {/* Modais */}
+        <ImageModal
+          isOpen={!!selectedImage}
+          imageUrl={selectedImage || ''}
+          onClose={() => setSelectedImage(null)}
+          images={selectedImage ? veiculoDetalhes[selectedImage.split('/').pop()?.split('_')[0] || '']?.fotos || [] : []}
+        />
+
+        <AlertDialog open={!!clienteParaExcluir} onOpenChange={() => setClienteParaExcluir(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => clienteParaExcluir && handleExcluir(clienteParaExcluir)}
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={!!veiculoParaExcluir} onOpenChange={() => setVeiculoParaExcluir(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão do veículo</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o veículo com placa {veiculoParaExcluir}? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => veiculoParaExcluir && handleExcluirVeiculo(veiculoParaExcluir)}
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      {/* Modal de imagem */}
-      <ImageModal
-        isOpen={!!selectedImage}
-        imageUrl={selectedImage || ''}
-        onClose={() => setSelectedImage(null)}
-      />
-
-      {/* Adicione o diálogo de confirmação no final do componente */}
-      <AlertDialog open={!!clienteParaExcluir} onOpenChange={() => setClienteParaExcluir(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => clienteParaExcluir && handleExcluir(clienteParaExcluir)}
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Adicionar novo diálogo de confirmação para exclusão de veículo */}
-      <AlertDialog 
-        open={!!veiculoParaExcluir} 
-        onOpenChange={() => setVeiculoParaExcluir(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão do veículo</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o veículo com placa {veiculoParaExcluir}? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => veiculoParaExcluir && handleExcluirVeiculo(veiculoParaExcluir)}
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
-  )
+  );
 }
