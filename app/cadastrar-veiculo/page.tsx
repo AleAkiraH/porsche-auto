@@ -1,241 +1,243 @@
-"use client";
-import { useState, useRef, useEffect } from "react";
-import { Camera, Car, X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+"use client"
 
-const LAMBDA_URL = "https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/";
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { PageHeader } from "@/components/ui/page-header"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft, Car, Camera } from "lucide-react"
+import Link from "next/link"
+import { useMask } from "@/hooks/useMask"
+import { themeColors, layoutClasses } from "@/constants/styles"
 
-export default function CadastrarVeiculo() {
-  const [formData, setFormData] = useState({
-    placa: "",
-    cpfCliente: "",
-    fotos: [] as string[],
-  });
-  const [fotos, setFotos] = useState<string[]>([]);
-  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [clientes, setClientes] = useState<{ nome: string; cpf: string }[]>([]);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+interface FormData {
+  placa: string
+  cpfCliente: string
+  fotos: File[]
+}
 
-  const fetchClientes = async () => {
-    try {
-      const response = await fetch(LAMBDA_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "buscar_clientes_e_veiculos" }),
-      });
-      if (!response.ok) {
-        throw new Error("Erro ao buscar clientes.");
+const MAX_IMAGE_SIZE = 800
+
+async function resizeImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (readerEvent) => {
+      const image = new Image();
+      image.onload = () => {
+        // Calcular novas dimensões mantendo proporção
+        let width = image.width;
+        let height = image.height;
+        if (width > height && width > MAX_IMAGE_SIZE) {
+          height *= MAX_IMAGE_SIZE / width;
+          width = MAX_IMAGE_SIZE;
+        } else if (height > MAX_IMAGE_SIZE) {
+          width *= MAX_IMAGE_SIZE / height;
+          height = MAX_IMAGE_SIZE;
+        }
+
+        // Criar canvas e redimensionar
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(image, 0, 0, width, height);
+
+        // Converter para base64 com qualidade reduzida
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(base64);
+      };
+      image.onerror = reject;
+      if (readerEvent.target?.result) {
+        image.src = readerEvent.target.result as string;
       }
-      const data = await response.json();
-      const clientesData = data.message || [];
-      setClientes(clientesData);
-    } catch (error) {
-      console.error("Erro ao buscar clientes:", error);
-      setFeedback({ type: "error", message: "Erro ao buscar clientes." });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export default function CadastrarVeiculoPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const cpf = searchParams.get('cpf')
+  const { maskPlaca } = useMask()
+  
+  const [formData, setFormData] = useState<FormData>({
+    placa: '',
+    cpfCliente: cpf || '',
+    fotos: []
+  })
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    let formattedValue = value
+
+    if (id === 'placa') {
+      formattedValue = maskPlaca(value)
     }
-  };
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
+    setFormData(prev => ({ ...prev, [id]: formattedValue }))
+  }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() })); // Converte para maiúsculas
-  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    setFormData(prev => ({ ...prev, fotos: [...prev.fotos, ...files] }))
+    
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file))
+    setPreviewUrls(prev => [...prev, ...newPreviewUrls])
+  }
 
-  const validatePlaca = (placa: string) => {
-    // Validação da placa
-    const regex = /^(?:[A-Z]{3}\d{4}|[A-Z]{3}\d[A-Z]\d{2}|[A-Z]{2}\d[A-Z]\d{2})$/;
-    return regex.test(placa);
-  };
+  const removePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      fotos: prev.fotos.filter((_, i) => i !== index)
+    }))
+    URL.revokeObjectURL(previewUrls[index])
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index))
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setFeedback(null);
-
-    // Validação da placa
-    if (!validatePlaca(formData.placa)) {
-      setFeedback({ type: "error", message: "Formato de placa inválido. A placa deve estar no formato correto." });
-      setIsLoading(false);
+  const handleSubmit = async () => {
+    if (!formData.placa || !formData.cpfCliente || formData.fotos.length === 0) {
       return;
     }
 
+    setLoading(true);
     try {
-      const dataToSend = {
-        action: "cadastrar_veiculo",
-        ...formData,
-        fotos: fotos,
-      };
-      const response = await fetch(LAMBDA_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro desconhecido ao cadastrar veículo.");
+      const fotosProcessadas = await Promise.all(
+        formData.fotos.map(async (file) => {
+          try {
+            const base64 = await resizeImage(file);
+            return base64;
+          } catch (error) {
+            return null;
+          }
+        })
+      );
+
+      const fotosValidas = fotosProcessadas.filter((foto): foto is string => foto !== null);
+
+      if (fotosValidas.length === 0) {
+        return;
       }
-      const responseData = await response.json();
-      setFeedback({ type: "success", message: responseData.message });
-      setFormData({ placa: "", cpfCliente: "", fotos: [] });
-      setFotos([]);
-    } catch (error) {
-      console.error("Detalhes do erro:", error);
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? `Erro ao cadastrar veículo: ${error.message}` : "Erro desconhecido. Tente novamente.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleFotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFotos((prev) => [...prev, reader.result as string]);
+      const payload = {
+        action: 'cadastrar_veiculo',
+        body: {
+          placa: formData.placa,
+          cpfCliente: formData.cpfCliente,
+          fotos: fotosValidas
+        }
       };
-      reader.readAsDataURL(file);
-    }
-  };
 
-  const handleDeleteFoto = (index: number) => {
-    setFotos((prev) => prev.filter((_, i) => i !== index));
+      const response = await fetch('https://5zmn1ieu92.execute-api.us-east-1.amazonaws.com/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      
+      if (data.message === "Veículo cadastrado com sucesso!") {
+        router.push('/buscar-cliente');
+      }
+    } catch (error) {
+      // Error handling without console.log
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Registre um Novo Veículo</h1>
-          <p className="mt-2 text-gray-600">Insira os detalhes do veículo para registro</p>
+    <div className={layoutClasses.pageWrapper}>
+      <div className={layoutClasses.backgroundEffects} />
+      
+      <div className={layoutClasses.container}>
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/buscar-cliente">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <PageHeader 
+            title="Cadastrar Veículo"
+            description={`Adicionando veículo para CPF: ${formData.cpfCliente}`}
+          />
         </div>
-      </div>
-      <Card className="bg-card p-4">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Car className="h-6 w-6 text-primary" />
-            Novo Veículo
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {feedback && (
-            <div
-              className={`mb-4 rounded-lg p-2 ${
-                feedback.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-              }`}
-            >
-              {feedback.message}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+        <Card className="max-w-2xl mx-auto p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-200">
+          <div className="grid gap-6">
             <div className="grid gap-2">
-              <div className="grid gap-1">
-                <label htmlFor="placa" className="text-sm font-medium text-gray-700">
-                  Placa
-                </label>
-                <Input 
-                  id="placa" 
-                  name="placa" 
-                  value={formData.placa} 
-                  onChange={handleInputChange} 
-                  required 
-                />
-              </div>
-              <div className="grid gap-1">
-                <label htmlFor="cpfCliente" className="text-sm font-medium text-gray-700">
-                  Cliente
-                </label>
-                <select
-                  id="cpfCliente"
-                  name="cpfCliente"
-                  className="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                  value={formData.cpfCliente}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((cliente) => (
-                    <option key={cliente.cpf} value={cliente.cpf}>
-                      {`${cliente.nome} (${cliente.cpf})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid gap-1">
-                <label className="text-sm font-medium text-gray-700">Fotos</label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
-                    <Camera className="h-4 w-4" />
-                    Adicionar Foto
-                  </Button>
+              <Label htmlFor="placa">Placa do Veículo *</Label>
+              <Input
+                id="placa"
+                value={formData.placa}
+                onChange={handleChange}
+                className="h-12 uppercase"
+                maxLength={8}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="flex items-center gap-2">
+                <Camera className="h-4 w-4" />
+                Fotos do Veículo *
+              </Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {previewUrls.map((url, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group">
+                    <img 
+                      src={url} 
+                      alt={`Preview ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removePhoto(idx)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+                <label className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex items-center justify-center">
                   <input
                     type="file"
-                    ref={fileInputRef}
-                    onChange={handleFotoCapture}
                     accept="image/*"
-                    capture="environment"
+                    multiple
                     className="hidden"
+                    onChange={handleFileChange}
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {fotos.map((foto, index) => (
-                    <div key={index} className="relative aspect-square">
-                      <img
-                        src={foto || "/placeholder.svg"}
-                        alt={`Foto ${index + 1}`}
-                        className="h-full w-full rounded-lg object-cover"
-                        onClick={() => setExpandedPhoto(foto)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteFoto(index)}
-                        className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                  <Camera className="h-8 w-8 text-gray-400" />
+                </label>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Cadastrando..." : "Cadastrar Veículo"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      {expandedPhoto && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={() => setExpandedPhoto(null)}
-        >
-          <div className="max-h-[90vh] max-w-[90vw]">
-            <img
-              src={expandedPhoto || "/placeholder.svg"}
-              alt="Foto expandida"
-              className="max-h-full max-w-full object-contain"
-            />
           </div>
-        </div>
-      )}
+
+          <div className="flex justify-end gap-4 mt-8">
+            <Button 
+              variant="outline"
+              className="hover:bg-gray-50"
+              onClick={() => router.push('/buscar-cliente')}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              className={themeColors.buttons.primary}
+              onClick={handleSubmit}
+              disabled={loading || !formData.placa || formData.fotos.length === 0}
+            >
+              {loading ? 'Cadastrando...' : 'Cadastrar Veículo'}
+            </Button>
+          </div>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
