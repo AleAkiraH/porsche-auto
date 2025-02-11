@@ -1,10 +1,21 @@
 "use client"
 
+import { Suspense } from "react"
 import { Card } from "@/components/ui/card"
 import { Mail, Phone, MapPin, User } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 
-export default function ConfirmarPage() {
+// Componente de Loading
+function LoadingState() {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+    </div>
+  )
+}
+
+// Componente principal que usa useSearchParams
+function ConfirmarContent() {
   const searchParams = useSearchParams()
   
   const nome = searchParams.get('nome')
@@ -66,5 +77,14 @@ export default function ConfirmarPage() {
         </div>
       </Card>
     </div>
+  )
+}
+
+// Componente wrapper com Suspense
+export default function ConfirmarPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <ConfirmarContent />
+    </Suspense>
   )
 }
