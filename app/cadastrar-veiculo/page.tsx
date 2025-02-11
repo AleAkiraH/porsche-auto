@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card } from "@/components/ui/card"
@@ -54,7 +54,8 @@ async function resizeImage(file: File): Promise<string> {
   });
 }
 
-export default function CadastrarVeiculoPage() {
+// Componente que usa useSearchParams
+function CadastrarVeiculoContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const cpf = searchParams.get('cpf')
@@ -235,5 +236,18 @@ export default function CadastrarVeiculoPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+// Componente principal com Suspense
+export default function CadastrarVeiculoPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    }>
+      <CadastrarVeiculoContent />
+    </Suspense>
   )
 }
