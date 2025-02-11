@@ -95,67 +95,66 @@ def buscar_orcamento_detalhes(body):
     return padronizar_resposta(200, resultado)
 
 @log_entrada_saida
-def cadastrar_orcamento(body):
+def cadastrar_orcamento(payload):
+    body = payload.get('body', {})
+    
     logger.info("📝 Iniciando cadastro de orçamento")
-    logger.info(f"📋 Dados do orçamento:\n{json.dumps(body, indent=2)}")
     
-    # Verifica se todos os campos obrigatórios estão presentes
-    if not validar_campos_obrigatorios({
-        'dataHora': body.get('dataHora'),
-        'dataEntrega': body.get('dataEntrega'),
-        'descricaoServico': body.get('descricaoServico'),
-        'valorServico': body.get('valorServico'),
-        'placaVeiculo': body.get('placaVeiculo')
-    }):
+    # Verifica campos obrigatórios
+    campos_obrigatorios = {
+        'placa': body.get('placa'),
+        'descricao': body.get('descricao'),
+        'previsaoEntrega': body.get('previsaoEntrega'),
+        'valor': body.get('valor'),
+        'dataHora': body.get('dataHora')
+    }
+
+    if not all(campos_obrigatorios.values()):
+        missing = [k for k, v in campos_obrigatorios.items() if not v]
+        logger.warning(f"Campos obrigatórios faltando: {missing}")
         return padronizar_resposta(400, 'Todos os campos são obrigatórios.')
+
+    # Verifica se o veículo existe
+    veiculo = collection_veiculo.find_one({'placa': body['placa']})
+    if not veiculo:
+        return padronizar_resposta(404, 'Veículo não encontrado.')
     
-    # Cria um novo dicionário com os campos do orçamento
-    cadastro_orcamento = {
-        'dataHora': body.get('dataHora'),
-        'dataEntrega': body.get('dataEntrega'),
-        'descricaoServico': body.get('descricaoServico'),
-        'valorServico': body.get('valorServico'),
-        'placaVeiculo': body.get('placaVeiculo')
+    # Cria o documento do orçamento
+    orcamento = {
+        'placa': body['placa'],
+        'descricao': body['descricao'],
+        'previsaoEntrega': body['previsaoEntrega'],
+        'valor': body['valor'],
+        'fotos': body.get('fotos', []),
+        'status': 'pendente',
+        'dataHora': body['dataHora'],
     }
     
-    # Insere o orçamento na coleção
-    collection_orcamento.insert_one(cadastro_orcamento)
-    logger.info("Orçamento cadastrado com sucesso: %s", cadastro_orcamento)
-    return padronizar_resposta(201, 'Orçamento cadastrado com sucesso!')
+    try:
+        result = collection_orcamento.insert_one(orcamento)
+        logger.info("Orçamento cadastrado com sucesso")
+        return padronizar_resposta(201, 'Orçamento cadastrado com sucesso!')
+        
+    except Exception as e:
+        logger.error(f"Erro ao cadastrar orçamento: {str(e)}")
+        return padronizar_resposta(500, f'Erro ao cadastrar orçamento: {str(e)}')
 
 @log_entrada_saida
 def buscar_orcamentos(body):
     logger.info("🔍 Buscando todos os orçamentos")
-    # Busca todos os orçamentos
-    orcamentos = list(collection_orcamento.find({}))
-    # Lista para armazenar os orçamentos formatados com informações do cliente
-    orcamentos_formatados = []
-    for orcamento in orcamentos:
-        # Obtemos a placa do veículo do orçamento
-        placa_veiculo = orcamento.get('placaVeiculo')
-        # Busca o veículo correspondente
-        veiculo = collection_veiculo.find_one({'placa': placa_veiculo})
-        if veiculo:
-            # Obtemos o CPF do cliente a partir do veículo
-            cpf_cliente = veiculo.get('cpf_cliente')
-            # Busca o cliente correspondente
-            cliente = collection_cliente.find_one({'cpf': cpf_cliente})
-            # Monta o orçamento formatado
-            orcamento_formatado = {
-                'dataHora': orcamento.get('dataHora'),
-                'dataEntrega': orcamento.get('dataEntrega'),
-                'descricaoServico': orcamento.get('descricaoServico'),
-                'valorServico': orcamento.get('valorServico').replace('\xa0', ' '),
-                'placaVeiculo': placa_veiculo,
-                'nomeCliente': cliente.get('nome') if cliente else None,
-                'telefoneCliente': cliente.get('telefone') if cliente else None,
-                'cpfCliente': cpf_cliente,
-                'fotos': veiculo.get('fotos') if veiculo else []  # Inclui as fotos do veículo
-            }
-            orcamentos_formatados.append(orcamento_formatado)
-    # Retorna os orçamentos encontrados
-    logger.info("Orçamentos encontrados: %s", orcamentos_formatados)
-    return padronizar_resposta(200, orcamentos_formatados)
+    try:
+        orcamentos = list(collection_orcamento.find({}))
+        
+        # Converte os ObjectIds para string
+        for orc in orcamentos:
+            orc['_id'] = str(orc['_id'])
+        
+        logger.info(f"Encontrados {len(orcamentos)} orçamentos")
+        return padronizar_resposta(200, orcamentos)
+        
+    except Exception as e:
+        logger.error(f"Erro ao buscar orçamentos: {str(e)}")
+        return padronizar_resposta(500, f'Erro ao buscar orçamentos: {str(e)}')
 
 @log_entrada_saida
 def cadastrar_cliente(body):
@@ -429,6 +428,40 @@ def excluir_veiculo(payload):
         return padronizar_resposta(500, f'Erro ao excluir veículo: {str(e)}')
 
 @log_entrada_saida
+def excluir_orcamento(payload):
+    try:
+        body = payload.get('body', {})
+        # Get and validate ID
+        id_orcamento = body.get('id', '').strip()
+        logger.info(f"🗑️ Excluindo orçamento: {id_orcamento}")
+        
+        if not id_orcamento:
+            logger.warning("❌ ID não fornecido")
+            return padronizar_resposta(400, 'ID do orçamento é obrigatório')
+        
+        try:
+            # Convert to ObjectId
+            object_id = ObjectId(id_orcamento)
+            
+            # Try to delete
+            result = collection_orcamento.delete_one({'_id': object_id})
+            
+            if result.deleted_count > 0:
+                logger.info("✅ Orçamento excluído com sucesso")
+                return padronizar_resposta(200, 'Orçamento excluído com sucesso')
+            else:
+                logger.warning("❌ Orçamento não encontrado")
+                return padronizar_resposta(404, 'Orçamento não encontrado')
+                
+        except Exception as e:
+            logger.error(f"❌ Erro ao processar ID: {str(e)}")
+            return padronizar_resposta(400, 'ID do orçamento inválido')
+            
+    except Exception as e:
+        logger.error(f"💥 Erro ao excluir orçamento: {str(e)}")
+        return padronizar_resposta(500, f'Erro ao excluir orçamento: {str(e)}')
+
+@log_entrada_saida
 def buscar_cliente_completo(payload):
     logger.info("🔍 Iniciando busca completa do cliente")
     logger.info(f"📥 Payload recebido: {payload}")
@@ -481,27 +514,42 @@ def buscar_cliente_completo(payload):
 def atualizar_cliente(payload):
     logger.info("🔄 Iniciando atualização do cliente")
     
-    body = payload.get('body', {})
-    cliente = body.get('cliente')
-    cpf_antigo = body.get('cpf_antigo')
-    
-    if not cliente or not cpf_antigo:
-        logger.warning("❌ Dados incompletos")
-        return padronizar_resposta(400, 'Dados incompletos')
-
     try:
+        body = payload.get('body', {})
+        
+        # Validação mais específica dos campos
+        if not body.get('cpf_antigo'):
+            logger.warning("❌ CPF antigo não fornecido")
+            return padronizar_resposta(400, 'CPF antigo é obrigatório')
+
+        # Extrair dados do cliente
+        cliente_dados = {
+            'nome': body.get('nome'),
+            'cpf': body.get('cpf'),
+            'telefone': body.get('telefone'),
+            'email': body.get('email', ''),
+            'endereco': body.get('endereco', '')
+        }
+
+        # Validar campos obrigatórios do cliente
+        campos_obrigatorios = ['nome', 'cpf', 'telefone']
+        for campo in campos_obrigatorios:
+            if not cliente_dados.get(campo):
+                logger.warning(f"❌ Campo obrigatório faltando: {campo}")
+                return padronizar_resposta(400, f'Campo {campo} é obrigatório')
+        
         # Atualiza o cliente
         result = collection_cliente.update_one(
-            {'cpf': cpf_antigo},
-            {'$set': cliente}
+            {'cpf': body['cpf_antigo']},
+            {'$set': cliente_dados}
         )
         
         if result.modified_count > 0:
             # Se o CPF foi alterado, atualiza a referência nos veículos
-            if cpf_antigo != cliente['cpf']:
+            if body['cpf_antigo'] != cliente_dados['cpf']:
                 collection_veiculo.update_many(
-                    {'cpf_cliente': cpf_antigo},
-                    {'$set': {'cpf_cliente': cliente['cpf']}}
+                    {'cpf_cliente': body['cpf_antigo']},
+                    {'$set': {'cpf_cliente': cliente_dados['cpf']}}
                 )
             
             logger.info("✅ Cliente atualizado com sucesso")
@@ -513,6 +561,98 @@ def atualizar_cliente(payload):
     except Exception as e:
         logger.error(f"💥 Erro ao atualizar cliente: {str(e)}")
         return padronizar_resposta(500, f'Erro ao atualizar cliente: {str(e)}')
+
+@log_entrada_saida
+def atualizar_orcamento(payload):
+    try:
+        body = payload.get('body', {})
+        id_orcamento = body.get('id')
+        
+        if not id_orcamento:
+            logger.error("❌ ID do orçamento não fornecido")
+            return padronizar_resposta(400, 'ID do orçamento é obrigatório')
+        
+        campos_obrigatorios = {
+            'placa': body.get('placa'),
+            'descricao': body.get('descricao'),
+            'previsaoEntrega': body.get('previsaoEntrega'),
+            'valor': body.get('valor')
+        }
+        
+        for campo, valor in campos_obrigatorios.items():
+            if valor is None:
+                logger.error(f"❌ Campo {campo} é obrigatório")
+                return padronizar_resposta(400, f'Campo {campo} é obrigatório')
+        
+        update_fields = {
+            'placa': body['placa'],
+            'descricao': body['descricao'],
+            'previsaoEntrega': body['previsaoEntrega'],
+            'valor': body['valor'],
+            'status': body.get('status', 'pendente'),
+            'fotos': body.get('fotos', []),
+            'dataAtualizacao': datetime.now().isoformat()
+        }
+        
+        try:
+            object_id = ObjectId(id_orcamento)
+            result = collection_orcamento.update_one(
+                {'_id': object_id},
+                {'$set': update_fields}
+            )
+            
+            if result.modified_count > 0:
+                return padronizar_resposta(200, '')  # Retorna string vazia ao invés de mensagem
+            else:
+                logger.warning("❌ Orçamento não encontrado")
+                return padronizar_resposta(404, 'Orçamento não encontrado')
+                
+        except Exception as e:
+            logger.error(f"❌ Erro ao processar atualização: {str(e)}")
+            return padronizar_resposta(400, f'Erro ao processar atualização: {str(e)}')
+            
+    except Exception as e:
+        logger.error(f"💥 Erro ao atualizar orçamento: {str(e)}")
+        return padronizar_resposta(500, f'Erro ao atualizar orçamento: {str(e)}')
+
+@log_entrada_saida
+def buscar_orcamento(body):
+    try:
+        id_orcamento = body.get('id')
+        logger.info(f"🔍 Buscando orçamento: {id_orcamento}")
+        
+        if not id_orcamento:
+            return padronizar_resposta(400, 'ID do orçamento é obrigatório')
+            
+        try:
+            object_id = ObjectId(id_orcamento)
+            orcamento = collection_orcamento.find_one({'_id': object_id})
+            
+            if not orcamento:
+                logger.warning("❌ Orçamento não encontrado")
+                return padronizar_resposta(404, 'Orçamento não encontrado')
+                
+            # Format the response with all necessary fields
+            formatted_orcamento = {
+                'placa': orcamento.get('placa'),
+                'descricao': orcamento.get('descricao'),
+                'previsaoEntrega': orcamento.get('previsaoEntrega'),
+                'valor': orcamento.get('valor'),
+                'fotos': orcamento.get('fotos', []),
+                'status': orcamento.get('status', 'pendente'),
+                'dataHora': orcamento.get('dataHora')
+            }
+            
+            logger.info("✅ Orçamento encontrado com sucesso")
+            return padronizar_resposta(200, formatted_orcamento)
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao processar ID: {str(e)}")
+            return padronizar_resposta(400, 'ID do orçamento inválido')
+            
+    except Exception as e:
+        logger.error(f"💥 Erro ao buscar orçamento: {str(e)}")
+        return padronizar_resposta(500, f'Erro ao buscar orçamento: {str(e)}')
 
 @log_entrada_saida
 def lambda_handler(event, context):
@@ -535,8 +675,11 @@ def lambda_handler(event, context):
             'buscar_orcamento_detalhes': buscar_orcamento_detalhes,
             'excluir_cliente': excluir_cliente,
             'excluir_veiculo': excluir_veiculo,
+            'excluir_orcamento': excluir_orcamento,
             'buscar_cliente_completo': buscar_cliente_completo,
-            'atualizar_cliente': atualizar_cliente
+            'atualizar_cliente': atualizar_cliente,
+            'atualizar_orcamento': atualizar_orcamento,
+            'buscar_orcamento': buscar_orcamento
         }
         
         if action not in acoes:

@@ -109,7 +109,6 @@ export default function BuscarClientePage() {
         }))
       }
     } catch (error) {
-      // Error handling without console.log
     } finally {
       setLoadingFotos(prev => ({ ...prev, [placa]: false }))
     }
@@ -136,7 +135,6 @@ export default function BuscarClientePage() {
         fetchClientes()
       }
     } catch (error) {
-      // Error handling without console.log
     } finally {
       setClienteParaExcluir(null)
     }
@@ -165,7 +163,6 @@ export default function BuscarClientePage() {
         fetchClientes()
       }
     } catch (error) {
-      console.error('Erro ao excluir veículo:', error)
     } finally {
       setVeiculoParaExcluir(null)
     }
@@ -177,7 +174,6 @@ export default function BuscarClientePage() {
 
   const handleVeiculoClick = (e: React.MouseEvent, placa: string) => {
     e.stopPropagation()
-    console.log('🚗 Buscando veículo específico:', placa)
     fetchVeiculoDetalhes(placa)
   }
 
@@ -201,7 +197,6 @@ export default function BuscarClientePage() {
   })
 
   useEffect(() => {
-    console.log('0. Componente montado, iniciando fetch...')
     fetchClientes()
   }, [])
 

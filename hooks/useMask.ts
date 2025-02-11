@@ -1,10 +1,9 @@
-export function useMask() {
+export const useMask = () => {
   const maskPlaca = (value: string) => {
-    return value
-      .toUpperCase()
-      .replace(/[^A-Z0-9]/g, '')
-      .replace(/(\w{3})(\w)/, '$1-$2')
-      .substring(0, 8)
+    // Remove qualquer caractere que não seja letra ou número
+    const cleaned = value.replace(/[^A-Za-z0-9]/g, '');
+    // Limita a 7 caracteres e converte para maiúsculo
+    return cleaned.toUpperCase().slice(0, 7);
   }
 
   const maskCPF = (value: string) => {
@@ -25,8 +24,8 @@ export function useMask() {
   }
 
   return { 
-    maskPlaca,
     maskCPF,
-    maskPhone // Alterado de maskTelefone para maskPhone
+    maskPhone,
+    maskPlaca,
   }
 }

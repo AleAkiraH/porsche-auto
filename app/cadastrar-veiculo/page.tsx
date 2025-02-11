@@ -144,7 +144,7 @@ function CadastrarVeiculoContent() {
         router.push('/buscar-cliente');
       }
     } catch (error) {
-      // Error handling
+      // Remove error logging
     } finally {
       setLoading(false);
     }

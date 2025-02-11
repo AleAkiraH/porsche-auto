@@ -45,7 +45,7 @@ export default function HomePage() {
               variant="ghost" 
               size="sm"
               className="text-gray-600 hover:text-gray-900"
-              onClick={() => console.log('Logoff clicked')}
+              onClick={() => {}} 
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sair

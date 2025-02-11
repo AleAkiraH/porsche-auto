@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Footer } from "@/components/ui/footer"
 import { cn } from "@/lib/utils"
+import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
         <div className="relative min-h-screen">
           {children}
           <Footer />
+          <Toaster position="top-right" richColors />
         </div>
       </body>
     </html>
