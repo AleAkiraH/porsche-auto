@@ -11,6 +11,7 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { ImageModal } from "@/components/ui/image-modal"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
+import { useMask } from "@/hooks/useMask"
 
 interface Cliente {
   nome: string
@@ -28,6 +29,7 @@ interface VeiculoDetalhes {
 }
 
 export default function BuscarClientePage() {
+  const { maskCPF } = useMask()
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [busca, setBusca] = useState("")
   const [loading, setLoading] = useState(true)
@@ -180,7 +182,7 @@ export default function BuscarClientePage() {
   const filteredClientes = clientes.filter(cliente => {
     // Validar se os campos existem antes de usar
     const nome = cliente.nome || ''
-    const cpf = cliente.cpf || ''
+    const cpf = maskCPF(cliente.cpf || '') // Aplica máscara no CPF
     const telefone = cliente.telefone || ''
     const placas = cliente.placa || [] // Array de placas do cliente
     const termoBusca = busca.toLowerCase()
@@ -210,7 +212,7 @@ export default function BuscarClientePage() {
           className="mb-6"
         >
           <PageHeader 
-            title="Gerenciamento de Clientes"
+            title="Gestão de Clientes"
             description="Sistema integrado de gestão de clientes Porsche"
           />
         </motion.div>
@@ -272,7 +274,7 @@ export default function BuscarClientePage() {
                       </div>
                       <div className="min-w-0 flex-1"> {/* Garante que o texto quebre */}
                         <h3 className="text-base font-semibold truncate">{cliente.nome}</h3>
-                        <p className="text-sm text-gray-500 truncate">CPF: {cliente.cpf}</p>
+                        <p className="text-sm text-gray-500 truncate">CPF: {maskCPF(cliente.cpf)}</p>
                       </div>
                     </div>
 
