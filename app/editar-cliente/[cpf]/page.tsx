@@ -38,7 +38,7 @@ interface FormData {
   }>
 }
 
-export default function EditarClientePage({ params }: { params: Promise<{ cpf: string }> }) {
+export default function EditarClientePage({ params }: { params: { cpf: string } }) {
   const resolvedParams = React.use(params)
   const router = useRouter()
   const { maskCPF, maskPhone } = useMask()
